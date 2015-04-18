@@ -1,13 +1,15 @@
 package com.fruitdev.jsonserver;
 
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.InputStreamReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.JSONObject;
 import java.io.BufferedReader;
-
-import org.json.*;
+import java.util.Scanner;
 
 public class Server {
 
@@ -41,21 +43,37 @@ public class Server {
 
         public void run() {
 
-            String jsonStr = "{ \"name\": \"John\", \"age\": 27 }";
-            String name = "";
-            int age = 0;
+            File file = new File("/home/aleksey/Documents/secrets.json");
+
+            JSONParser parser = new JSONParser();
+            String
+                    title   = "",
+                    author  = "",
+                    version = "",
+                    date    = "";
 
             try {
-                JSONObject obj = new JSONObject(jsonStr);
-                name = obj.getString("name");
-                age = obj.getInt("age");
-            } catch (JSONException e) {
+
+                Object obj = parser.parse(new FileReader(file));
+
+                JSONObject jsonObject = (JSONObject) obj;
+
+                title = (String) jsonObject.get("title");
+                version= (String) jsonObject.get("version");
+                author = (String) jsonObject.get("author");
+                date = (String) jsonObject.get("date");
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
             try {
                 readInputHeaders();
-                writeResponse("<html><head><title>JSON</title></head><body><h1>Name: " + name +"<br />Age: " + age + "</h1></body></html>");
+                writeResponse("<html><head><title>JSON</title></head><body><h1>Title: " + title +"<br />Version: " + version + "<br />Author: " + author + "<br />Date: " + date + "</h1></body></html>");
             } catch (Throwable t) {
                 /* do nothing */
             } finally {
